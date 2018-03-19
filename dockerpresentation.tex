@@ -3,6 +3,7 @@
 \usetheme{Rochester}
 \beamertemplatenavigationsymbolsempty
 \input{./beamer_redbee_theme.tex}
+\linespread{0.8}
 % \usecolortheme{beaver}
 
 %% Paquetes adicionales
@@ -12,7 +13,7 @@
 \usepackage{minted}
 \usepackage{setspace}
 
-\title[Docker for dummies] {Docker for dummies}
+\title[Docker: the gory details] {Docker: the gory details}
 \author[Leandro Kollenberger]
 {Leandro Kollenberger}
 \institute[redbee] {
@@ -21,7 +22,7 @@ redbee studios
 \date[dockerpres] {
 	30 de Marzo de 2018
 }
-\subject {Docker for dummies}
+\subject {Docker: the gory details}
 \titlegraphic{\vspace{-2cm}}
 % \titlegraphic{\includegraphics[height=.5\textheight]{assets/docker_logo.png}}
 
@@ -48,6 +49,16 @@ redbee studios
 \end{frame}
 
 % \frame{\titlepage}
+
+\begin{frame}[fragile]
+	\frametitle{Por qué presenciar esta charla}
+	\begin{itemize}
+		\item Sos desarrollador, usás Docker hace tiempo en tu día a día pero te interesa saber algo más de detalle.
+		\item Sos de ops, pero nunca tocaste Docker a fondo.
+		\item Te interesó la charla.
+		\item Hay comida.
+	\end{itemize}
+\end{frame}
 
 \begin{frame}[fragile]
 	\frametitle{¿Qué es Docker?}
@@ -138,6 +149,26 @@ ENTRYPOINT hi.sh
 			\end{spacing}
 	\vspace*{\fill}
 	\end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Arquitectura de Docker}
+	\centering
+		\includegraphics[width=\textwidth]{assets/architecture.png}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Arquitectura de Docker}
+	\begin{itemize}
+		\item \footnotesize Cliente: Aplicación de consola que se comunica con el daemon. Puede comunicarse tanto con el daemon de la máquina local (por socket de Unix) como con una remota (por TCP). Ejemplo: \texttt{docker run}, \texttt{docker image ls}.
+		\item \footnotesize Daemon: Servicio de Docker corriendo en backgroud que gestiona imágenes y containers.
+		\item \footnotesize Registry: Repositorio remoto de imágenes. En detalle, almacena tres tipos de datos:
+		\begin{itemize}
+			\item \footnotesize Layers (cada una con su hash y el comando de Dockerfile que la generó).
+			\item \footnotesize Imágenes, básicamente una lista de hashes de cada una de las layers que la componen, más metadatos y un hash propio de la imagen.
+			\item \footnotesize Tags (human readable), que apuntan a hashes de imágenes. Son sobreescribibles. Ejemplos: \texttt{redis:4.0.6}, \texttt{jess/routersploit} o \texttt{docker.dev.redbee.io/ms-lalala-rest:release-v1.2.1}. Pueden referirse a la library (imágenes oficiales, primer caso), imágenes dentro del Docker Hub pero de terceros (segundo caso) u otras registries privadas (tercer caso). Si no se indica una versión por defecto es \texttt{latest}.
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 %% Fin de la presentación!
