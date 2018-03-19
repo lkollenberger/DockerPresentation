@@ -19,7 +19,7 @@
 redbee studios
 }
 \date[dockerpres] {
-  30 de Marzo de 2018
+	30 de Marzo de 2018
 }
 \subject {Docker for dummies}
 \titlegraphic{\vspace{-2cm}}
@@ -39,71 +39,117 @@ redbee studios
 \begin{document}
 
 \begin{frame}
-   \tikz [remember picture,overlay]
-    \node at
-        % ([yshift=3cm]current page.south) 
-        ([yshift=1.8cm]current page.center)
-        {\includegraphics[height=.5\textheight]{assets/docker_logo.png}};
-   \titlepage
+	 \tikz [remember picture,overlay]
+		\node at
+				% ([yshift=3cm]current page.south) 
+				([yshift=1.8cm]current page.center)
+				{\includegraphics[height=.5\textheight]{assets/docker_logo.png}};
+	 \titlepage
 \end{frame}
 
 % \frame{\titlepage}
 
 \begin{frame}[fragile]
-  \frametitle{¿Qué es Docker?}
-  \vspace{-0.8cm}
-  \begin{multicols}{2}
-  \justify
-	  Docker es una herramienta que nos facilita enpaquetar una aplicación junto con su \textit{runtime} dentro de una \textbf{imagen}, que luego se ejecutará dentro de un \textbf{container}.
+	\frametitle{¿Qué es Docker?}
+	\vspace{-0.8cm}
+	\begin{multicols}{2}
+	\justify
+		Docker es una herramienta que nos facilita enpaquetar una aplicación junto con su \textit{runtime} dentro de una \textbf{imagen}, que luego se ejecutará dentro de un \textbf{container}.
 
-	  Gracias a la gran cantidad de \textbf{imágenes base} que hay disponibles en el \textbf{Docker Hub} y la simple sintaxis del \textbf{Dockerfile}, crear imágenes propias con nuestra aplicación es muy simple.
-  \columnbreak
-  \vspace*{\fill}
-  	\textbf{Dockerfile}
-  	\begin{minted}{docker}
+		Gracias a la gran cantidad de \textbf{imágenes base} que hay disponibles en el \textbf{Docker Hub} y la simple sintaxis del \textbf{Dockerfile}, crear imágenes propias con nuestra aplicación es muy simple.
+	\columnbreak
+	\vspace*{\fill}
+		\textbf{Dockerfile}
+		\begin{minted}{docker}
 FROM debian:9
 RUN echo "echo 'Hola mundo!'"\
-    > /hi.sh && \
-    chmod +x /hi.sh
+		> /hi.sh && \
+		chmod +x /hi.sh
 ENTRYPOINT hi.sh
-    \end{minted}
-  \vspace*{\fill}
-  \end{multicols}
+		\end{minted}
+	\vspace*{\fill}
+	\end{multicols}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{¿Qué es un container?}
-  \vspace{-0.8cm}
-  \begin{multicols}{2}
-  \justify
-  	  \begin{spacing}{0.8}
-	  \small Un \textbf{container} es una funcionalidad del sistema operativo que nos permite ejecutar ciertas aplicaciones dentro de un \textbf{namespace} aparte.
+	\frametitle{¿Qué es un container?}
+	\vspace{-0.8cm}
+	\begin{multicols}{2}
+	\justify
+			\begin{spacing}{0.8}
+		\small Un \textbf{container} es una funcionalidad del sistema operativo que nos permite ejecutar ciertas aplicaciones dentro de un \textbf{namespace} aparte.
 
-	  \vspace{0.25cm}
+		\vspace{0.25cm}
 
-	  \small Un \textbf{namespace} es una separación lógica de los recursos del sistema, como por ejemplo CPU, memoria RAM, puntos de montaje (disco), árbol de procesos, network, etc.
+		\small Un \textbf{namespace} es una separación lógica de los recursos del sistema, como por ejemplo CPU, memoria RAM, puntos de montaje (disco), árbol de procesos, network, etc.
 
-	  \vspace{0.25cm}
+		\vspace{0.25cm}
 
-	  \small De esta forma un container nos provee seguridad y aislamiento de las aplicaciones que corren en él, similar a lo que nos permite una VM, sin el overhead de simular hardware y correr un sistema operativo entero, ya que todos los containers corriendo en un mismo host comparten su kernel.
-  	  \end{spacing}
-  \columnbreak
-  \vspace*{\fill}
-  	\includegraphics[height=.6\textheight]{assets/containerz.png}
-  \vspace*{\fill}
-  \end{multicols}
+		\small De esta forma un container nos provee seguridad y aislamiento de las aplicaciones que corren en él, similar a lo que nos permite una VM, sin el overhead de simular hardware y correr un sistema operativo entero, ya que todos los containers corriendo en un mismo host comparten su kernel.
+			\end{spacing}
+	\columnbreak
+	\vspace*{\fill}
+		\includegraphics[height=.6\textheight]{assets/containerz.png}
+	\vspace*{\fill}
+	\end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{El concepto de "layer"}
+	\vspace{-0.5cm}
+	\justify
+	\centering
+	\includegraphics[width=.75\textwidth]{assets/layers3.png}
+	\vspace{-0.5cm}
+	\begin{multicols}{2}
+	\justify
+		\begin{spacing}{0.8}
+		\small Las imágenes de Docker que podemos usar a diario están compuestas por una o más \textbf{layers}. Éstas imágenes contienen un sistema de archivos correspondiente al sistema operativo o la aplicación que queremos ejecutar. Esta imagen está identificada por un hash y opcionalmente uno o más \textbf{tags}, como por ejemplo \textit{redis:4.0.6} o \textit{debian:latest}.
+
+		\columnbreak
+
+		\small Cada layer contiene únicamente los cambios (ya sean archivos, comandos o metadatos) con respecto a la layer anterior, se identifican con un hash y corresponden cada una a un comando del Dockerfile. Todas las layers que componen una imagen son \textbf{read only}.
+
+		\end{spacing}
+	\end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{El concepto de "layer"}
+	\vspace{-0.8cm}
+	\begin{multicols}{2}
+	\justify
+	\vspace*{\fill}
+		\hspace{-0.5cm}
+		\includegraphics[height=.5\textheight]{assets/layers2.jpg}
+	\vspace*{\fill}
+	\columnbreak
+	\vspace*{\fill}
+		\begin{spacing}{0.8}
+		\small Cada layer contiene únicamente los cambios (ya sean archivos, comandos o metadatos) con respecto a la layer anterior, se identifican con un hash y corresponden cada una a un comando del Dockerfile. Todas las layers que componen una imagen son \textbf{read only}.
+
+		\vspace{0.25cm}
+
+		\small Al momento de crear un nuevo container a base de una imagen, se crea una pequeña layer \textbf{read-write}, que contiene los cambios creados por el container en ejecución (por ejemplo, por la aplicación).
+
+		\vspace{0.25cm}
+
+		\small Esta última layer se \textbf{pierde al eliminar el container}.
+			\end{spacing}
+	\vspace*{\fill}
+	\end{multicols}
 \end{frame}
 
 %% Fin de la presentación!
 \begin{frame}
-  \vspace{-0.8cm}
-  \begin{center}
-    %% Foto de Perón
-    \begin{figure}
-    \includegraphics[width = 0.8\textwidth]{./assets/peron1.jpg}
-    \end{figure}
-    \Large{\textbf{Gracias! \\ Preguntas?}}
-  \end{center}
+	\vspace{-0.8cm}
+	\begin{center}
+		%% Foto de Perón
+		\begin{figure}
+		\includegraphics[width = 0.8\textwidth]{./assets/peron1.jpg}
+		\end{figure}
+		\Large{\textbf{Gracias! \\ Preguntas?}}
+	\end{center}
 \end{frame}
 
 \end{document}
