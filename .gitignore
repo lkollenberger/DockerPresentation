@@ -3,4 +3,5 @@
 !/assets/
 !beamer_redbee_theme.tex
 !dockerpresentation.tex
+!dockerpresentation.pdf
 !.gitignore
