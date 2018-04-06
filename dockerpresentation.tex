@@ -13,14 +13,14 @@
 \usepackage{minted}
 \usepackage{setspace}
 
-\title[Docker: the gory details] {Docker: the gory details}
+\title[Docker: the nice and the gory] {Docker: the nice and the gory}
 \author[Leandro Kollenberger]
 {Leandro Kollenberger}
 \institute[redbee] {
 redbee studios
 }
 \date[dockerpres] {
-	30 de Marzo de 2018
+	6 de Abril de 2018
 }
 \subject {Docker: the gory details}
 \titlegraphic{\vspace{-2cm}}
@@ -80,6 +80,100 @@ ENTRYPOINT hi.sh
 		\end{minted}
 	\vspace*{\fill}
 	\end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]
+	\Huge The nice about Docker
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Usando la CLI}
+	Comandos útiles para manejar Docker
+	\begin{itemize}
+		\item \texttt{docker run}: crear un container. Optiones útiles:
+		\begin{itemize}
+			\item \texttt{--rm}: borrar el container cuando se detenga.
+			\item \texttt{-i}: \textit{interactive}, habilita la salida estándar del container.
+			\item \texttt{-t}: habilita la entrada de teclado al container, generalmente usado junto con \texttt{-i}.
+			\item \texttt{-p puertoexterno:puertointerno}: \textit{publish}, publica (mapea) un puerto externo en el host a un puerto dentro del container, por ejemplo \texttt{-p 8080:80} mapea las conexiones entrantes en el puerto 8080 del host al 80 del container.
+			\item \texttt{--name=lalala} \textit{self-explainatory}.
+			\item \texttt{-v /path/en/el/host:/path/dentro/del/container} \textit{volume}, mapea un volúmen de docker o path en el host a un path dentro del container. Sirve también para archivos y se le puede agregar \texttt{:ro} para indicar \textit{read-only}.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Usando la CLI}
+	\begin{itemize}
+		\item \texttt{docker ps}: Listar containers corriendo (con \texttt{-a} lista también containers detenidos)
+		\item \texttt{docker start/stop}: Arrancar/detener containers.
+		\item \texttt{docker images}: Listar imágenes disponibles en el sistema.
+		\item \texttt{docker rmi}: Borrar imágenes.
+		\item \texttt{docker network}: Listar/borrar/crear una network administrada por Docker.
+		\item \texttt{docker exec -it container comando}: Ejecutar \texttt{comando} dentro de \texttt{container}. Sirve para "meterse" dentro y hacer cambios.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Docker Compose}
+	 \vspace{-0.4cm}
+	\begin{multicols}{2}
+	% \justify
+	\vspace*{\fill}
+	Hermoso.
+
+	Es un archivo YAML que describe containers a crear. Permite comunicación entre containers con nombre de DNS y sin linkear.
+
+	\scriptsize Sintaxis: https://docs.docker.com/compose/compose-file/
+	\vspace*{\fill}
+	\columnbreak
+	% \vspace{2}
+	\tiny \begin{minted}{yaml}
+version: "2"
+services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - web
+    volumes:
+      - /data/ssl:/ssl:ro
+      - /data/nginx.conf:/data/nginx.conf:ro
+  nextcloud:
+    image: nextcloud:apache
+    restart: unless-stopped
+    volumes:
+      - /data/nextcloud:/var/www/html/data
+    expose:
+      - "80"
+    networks:
+      - web
+    depends_on:
+      - nginx
+      - nextcloud-db
+  nextcloud-db:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      - "POSTGRES_PASSWORD=******"
+      - "POSTGRES_USER=nextcloud"
+      - "POSTGRES_DB=nextcloud"
+    volumes:
+      - /data/nextcloud-db:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - web
+		\end{minted}
+	\vspace*{\fill}
+	\end{multicols}
+\end{frame}
+
+\begin{frame}[fragile]
+	\Huge The \textbf{gory} about Docker
 \end{frame}
 
 \begin{frame}[fragile]
@@ -168,6 +262,57 @@ ENTRYPOINT hi.sh
 			\item \footnotesize Imágenes, básicamente una lista de hashes de cada una de las layers que la componen, más metadatos y un hash propio de la imagen.
 			\item \footnotesize Tags (human readable), que apuntan a hashes de imágenes. Son sobreescribibles. Ejemplos: \texttt{redis:4.0.6}, \texttt{jess/routersploit} o \texttt{docker.dev.redbee.io/ms-lalala-rest:release-v1.2.1}. Pueden referirse a la library (imágenes oficiales, primer caso), imágenes dentro del Docker Hub pero de terceros (segundo caso) u otras registries privadas (tercer caso). Si no se indica una versión por defecto es \texttt{latest}.
 		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Namespaces}
+	El \textit{kernel} Linux nos permite aislar los siguientes subsistemas en namespaces:
+	\begin{itemize}
+		\item \textbf{mnt}, Mount: puntos de montaje y sistema de archivos.
+		\item \textbf{pid}, Process ID: árbol de procesos.
+		\item \textbf{net}, Network: placas de red, tablas de routeo, firewall...
+		\item \textbf{ipc}, Inter-process Communication: colas, pilas, sockets...
+		\item \textbf{uts}: hostname, domain name.
+		\item \textbf{user}: IDs de usuario y grupo.
+	\end{itemize}
+	% Nos vamos a enfocar en \textbf{mnt}, \textbf{pid}, \textbf{net} y \textbf{user}.
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Networking en containers}
+	Las aplicaciones en general publican servicios, cómo accedemos si estamos dentro de un container?
+	\begin{itemize}
+		\item \texttt{net=host}: desactivamos el namespace de networking, comparte puertos y servicios con las aplicaciones comúnes del host.
+		\item \texttt{net=bridge}: ponemos un switch virtual en el host, placas de red dentro del container, las conectamos ahí y abrimos puertos en el host. Funciona parecido a un router hogareño: comparte una IP (la del host) y forwardea puertos a donde corresponda. Ejemplo: \texttt{docker run -d -p 1234:80 nginx} levanta un container de nginx y forwardea conexiones entrantes al host en puerto 1234 al puerto 80 del container.
+		\item \texttt{net=none}: desactiva la red completamente, \textit{duh.}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Storage drivers (\textit{a.k.a. La magia detrás de las layers})}
+	Los storage drivers (también conocidos como \textit{graph drivers}) son drivers del kernel Linux que permiten montar las layers una encima de otra, agregando cada una sus respectivos cambios. Opciones:
+	\begin{itemize}
+		\item \texttt{overlay2}: Recomendada, es la más moderna.
+		\item \texttt{overlay}: Recomendada (si el kernel no soporta \texttt{overlay2}).
+		\item \texttt{aufs}: Vieja, se usaba antes de que existiera \texttt{overlay}). No recomendada.
+		\item \texttt{btrfs}
+		\item \texttt{devicemapper}:
+		\begin{itemize}
+			\item \texttt{direct-lvm}: Recomendada en caso de tener LVM con thinpool.
+			\item \texttt{direct-loop}: No recomendada, lentísima.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Más allá de Docker}
+	Los containers son divertidos, pero complejos de administrar!
+	\begin{itemize}
+		\item Kubernetes.
+		\item Apache Mesos.
+		\item Hashicorp Nomad.
+		\item Docker Swarm.
 	\end{itemize}
 \end{frame}
 
